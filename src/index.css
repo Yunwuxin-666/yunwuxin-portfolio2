@@ -86,3 +86,38 @@ footer{padding-top:85px;min-height:0}.footer-bottom{margin-top:85px}.contact-but
 .cover-editor .cover-replace,.cover-editor .cover-replace:hover{inset:0;display:block;padding:0;border:0;border-radius:0;background:transparent;backdrop-filter:none;-webkit-backdrop-filter:none;cursor:pointer}
 .cover-editor .cover-replace:focus-within{outline:2px solid #fff;outline-offset:-4px}
 .modal-header-actions{display:flex;gap:8px;align-items:center}
+
+/* Organic, softly intermingling pools of blue light. */
+body{background:#04070b}
+body::before,body::after{content:'';position:fixed;inset:-12%;z-index:0;pointer-events:none;will-change:transform;filter:blur(36px)}
+body::before{background:radial-gradient(ellipse 29% 25% at 24% 35%,rgba(24,127,199,.70),rgba(12,74,133,.32) 48%,transparent 78%),radial-gradient(ellipse 22% 20% at 63% 28%,rgba(43,119,182,.52),transparent 77%),radial-gradient(ellipse 24% 23% at 75% 72%,rgba(12,87,84,.30),transparent 77%),radial-gradient(ellipse 25% 21% at 30% 78%,rgba(48,39,105,.34),transparent 78%);animation:ambient-flow 20s ease-in-out infinite}
+body::after{background:radial-gradient(ellipse 23% 23% at 37% 60%,rgba(17,100,174,.55),transparent 76%),radial-gradient(ellipse 21% 19% at 68% 46%,rgba(24,94,146,.48),transparent 76%),radial-gradient(ellipse 17% 17% at 48% 38%,rgba(2,5,11,.86),transparent 78%),radial-gradient(ellipse 19% 18% at 15% 72%,rgba(45,40,112,.31),transparent 76%);animation:ambient-fold 27s ease-in-out infinite}
+#root{position:relative;z-index:1}
+.carousel-fade.left{background:linear-gradient(90deg,rgba(4,7,11,.36),transparent)}
+.carousel-fade.right{background:linear-gradient(-90deg,rgba(4,7,11,.36),transparent)}
+@keyframes ambient-flow{
+  0%,100%{transform:translate3d(-3%,-2%,0) rotate(-5deg) scale(1.02,.96)}
+  25%{transform:translate3d(5%,3%,0) rotate(3deg) scale(.88,1.12)}
+  50%{transform:translate3d(1%,-4%,0) rotate(9deg) scale(1.12,.87)}
+  75%{transform:translate3d(-5%,3%,0) rotate(-2deg) scale(.96,1.08)}
+}
+@keyframes ambient-fold{
+  0%,100%{transform:translate3d(4%,3%,0) rotate(7deg) scale(.92,1.05)}
+  33%{transform:translate3d(-6%,-3%,0) rotate(-8deg) scale(1.15,.88)}
+  66%{transform:translate3d(3%,5%,0) rotate(4deg) scale(.89,1.14)}
+}
+@media(max-width:650px){body::before,body::after{filter:blur(25px)}}
+@media(prefers-reduced-motion:reduce){body::before,body::after{animation:none;will-change:auto}}
+/* The footer film dissolves into the ambient background above. */
+footer{isolation:isolate;padding-top:clamp(135px,16vw,230px)}
+.footer-video{position:absolute;inset:0;z-index:-2;pointer-events:none;overflow:hidden;mask-image:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.3) 15%,#000 37%,#000 100%);-webkit-mask-image:linear-gradient(to bottom,transparent 0%,rgba(0,0,0,.3) 15%,#000 37%,#000 100%)}
+.footer-video video{width:100%;height:100%;display:block;object-fit:cover;object-position:center;opacity:.78}
+footer::before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(to bottom,transparent 0%,rgba(3,6,10,.12) 30%,rgba(3,6,10,.3) 100%)}
+.footer-glow{z-index:-1}
+footer h2,footer p,footer .eyebrow{text-shadow:0 2px 16px #000}
+@media(max-width:650px){footer{padding-top:135px}.footer-video video{object-position:center}}
+@media(prefers-reduced-motion:reduce){.footer-video{display:none}}
+
+/* Raise the footer message without moving the film or copyright row. */
+footer > .eyebrow,footer > h2,footer > p,footer > .contact-button{position:relative;top:-160px}
+@media(max-width:650px){footer > .eyebrow,footer > h2,footer > p,footer > .contact-button{top:-85px}}
