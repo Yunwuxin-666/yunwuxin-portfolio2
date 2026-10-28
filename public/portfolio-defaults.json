@@ -1,0 +1,29 @@
+[
+  {
+    "id": "01",
+    "story": "点击这里填写项目背景、创作过程或成果。",
+    "title": "光的另一种形态",
+    "gallery": [
+      {
+        "name": "f3a2778aec0a1723b288214f5e35cb6c.jpg",
+        "type": "image/jpeg",
+        "url": "portfolio-media/project-01-asset-1.jpg"
+      },
+      {
+        "name": "d73a4e59b717ec5507917bdf174b5dfc.jpg",
+        "type": "image/jpeg",
+        "url": "portfolio-media/project-01-asset-2.jpg"
+      },
+      {
+        "name": "带货视频.mp4",
+        "type": "video/mp4",
+        "url": "portfolio-media/project-01-asset-3.mp4"
+      },
+      {
+        "name": "9a3839e0b9769d4984aa7947bc7a3526.jpg",
+        "type": "image/jpeg",
+        "url": "portfolio-media/project-01-asset-4.jpg"
+      }
+    ]
+  }
+]
