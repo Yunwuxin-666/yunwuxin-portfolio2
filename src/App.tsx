@@ -266,7 +266,7 @@ export default function App() {
   }, []);
   const open = (p: Project, el: HTMLElement) => { triggerRef.current = el; setSelected(p); };
   return <>
-    <header className="nav-wrap"><nav className="nav glass" aria-label="主导航"><a className="logo" href="#top">YOUR NAME<span className="logo-dot">.</span></a><div className="nav-links"><a href="#work">作品</a><a href="#about">关于</a><a href="#contact">联系</a></div></nav></header>
+    <header className="nav-wrap"><nav className="nav glass" aria-label="主导航"><a className="logo" href="#top">YOUR NAME<span className="logo-dot">.</span></a><div className="nav-links"><a href="#work">作品</a><a href="./studio/">3D 工作室</a><a href="#about">关于</a><a href="#contact">联系</a></div></nav></header>
     <main id="top">
       <section className="hero"><div className="hero-copy"><div className="availability"><span /> PORTFOLIO · OPEN TO WORK</div><h1>Ideas made<br/><em>visible.</em></h1><p>用影像、设计与故事，让想法拥有形状。</p><a className="hero-link" href="#work">探索精选作品</a></div>
         <div className="carousel" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} aria-label="精选作品轮播">

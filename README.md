@@ -2,6 +2,8 @@
 
 React + Vite 作品集，包含首页轮播、项目详情和滚动卡片。
 
+[进入 3D 工作室](https://yunwuxin-666.github.io/yunwuxin-portfolio2/studio/)浏览相框、月历和可翻页的拼贴项目册。工作室的源码与运行方法见 [studio](studio/)。
+
 ## 本地运行
 
 ```bash

@@ -21,6 +21,10 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - run: npm ci
+        working-directory: studio
+      - run: npm run build -- --outDir ../dist/studio
+        working-directory: studio
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
