@@ -1,3 +1,67 @@
 <!doctype html>
-<html lang="en"><head><meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="theme-color" content="#000000" /><title>Your Name — Creative Portfolio</title><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"></head><body><div id="root"></div><script type="module" src="/src/main.tsx"></script></body></html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 
+    <link
+      rel="icon"
+      type="image/png"
+      href="/media/favicon-96x96.png"
+      sizes="96x96"
+    />
+    <link rel="icon" type="image/svg+xml" href="/media/favicon.svg" />
+    <link rel="shortcut icon" href="/media/favicon.ico" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/media/apple-touch-icon.png"
+    />
+    <link rel="manifest" href="/media/site.webmanifest" />
+
+    <meta property="og:locale" content="zh_CN" />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="./media/room-detail.webp" />
+
+    <meta
+      property="og:description"
+      content="Explore Yunwuxin Portfolio in an interactive 3D studio."
+    />
+
+    <title>Yunwuxin Portfolio</title>
+  </head>
+  <body>
+    <div class="preloader">
+      <div class="preloader__inner">
+        <div class="preloader__progress-wrapper">
+          <div class="preloader__progress-bar"></div>
+        </div>
+        <span class="preloader__percent" aria-hidden="true">0%</span>
+        <p class="visually-hidden" id="load-status" role="status">Loading the 3D room.</p>
+
+        <div id="load-error" hidden>
+          <p class="preloader__description">The 3D room could not load. Check that your browser supports WebGL 2 or WebGPU and try again.</p>
+          <button id="retry-btn" class="preloader__btn preloader__btn--primary">Retry</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Original 3D scene and interactions by Andrew Woan on Codrops. -->
+    <main id="experience-wrapper" inert>
+      <h1 class="visually-hidden">Yunwuxin Portfolio</h1>
+      <p class="visually-hidden" id="scene-help">Explore Yunwuxin’s studio and open the project book on the desk. Use the arrow keys to turn pages. In the room, use 1 for frames, 2 for the calendar, 3 for characters, 4 for the house, and 5 for music. Plus and minus zoom. Escape goes back.</p>
+      <canvas id="experience-canvas" tabindex="0" aria-label="Yunwuxin 3D 工作室" aria-describedby="scene-help" aria-keyshortcuts="1 2 3 4 5 Escape + -"></canvas>
+    </main>
+
+    <button id="back-btn" class="back-btn">&#8592; Back</button>
+
+    <div class="top-right-controls" inert>
+      <button id="day-night-toggle" class="day-night-btn" aria-label="Night mode" aria-pressed="false">
+        <span class="day-night-btn__icon" aria-hidden="true">&#9790;</span>
+      </button>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

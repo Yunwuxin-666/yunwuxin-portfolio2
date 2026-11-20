@@ -198,9 +198,14 @@ export class ProjectDesk {
     this.nav.className="desk-navigation";
     this.nav.setAttribute("aria-label","项目册");
     this.nav.hidden=true;
-    this.nav.innerHTML='<button aria-label="上一页">←</button><output aria-live="polite"></output><button aria-label="下一页">→</button><button aria-label="合上项目册">合上</button>';
+    this.nav.innerHTML='<button aria-label="上一页">←</button><output aria-live="polite"></output><button aria-label="下一页">→</button><button hidden></button><button aria-label="合上项目册">合上</button>';
     room.append(this.nav);
-    [this.previous,this.next,this.closeButton]=this.nav.querySelectorAll("button");
+    [this.previous,this.next,this.sideButton,this.closeButton]=this.nav.querySelectorAll("button");
+    this.sideButton.onclick = () => {
+      if (this.phase !== "reading" || this.flipping) return;
+      this.leftPage = !this.leftPage;
+      this.approach(this.experience.motionDuration(0.45));
+    };
     this.openButton.onclick=()=>this.open();
     this.closeButton.onclick=()=>this.close();
     this.previous.onclick=()=>this.turn(-1);
@@ -256,9 +261,6 @@ export class ProjectDesk {
       event.stopImmediatePropagation();event.preventDefault();
       if(event.key==="Escape") this.close(); else this.turn(event.key==="ArrowLeft"?-1:1);
     },true);
-    window.addEventListener("resize",()=>{
-      if(this.phase==="reading" || this.phase==="entering") this.approach(0);
-    });
   }
 
   get active() {
@@ -277,13 +279,35 @@ export class ProjectDesk {
   }
 
   approach(duration) {
-    const camera=this.camera.instance;
-    const portrait=camera.aspect<0.75;
-    const width=portrait ? 6.62 : 7.15;
-    const distance=Math.max(5.85,width/camera.aspect)/(2*Math.tan(THREE.MathUtils.degToRad(camera.fov/2)));
-    const end=new THREE.Vector3(-2.80,distance-1,-24.65);
+    const camera = this.camera.instance;
+    const {width, height} = this.experience.sizes;
+    const singlePage = width <= 600 && camera.aspect < 0.85;
+    this.sideButton.hidden = !singlePage;
+    this.sideButton.textContent = this.leftPage ? "看右页" : "看左页";
+    const sideRail = matchMedia("(max-height: 500px) and (min-aspect-ratio: 3/2)").matches;
+    const controls = this.nav.getBoundingClientRect();
+    const bottomSpace = sideRail ? 10 : height - controls.top + 8;
+    const heightInView = (singlePage ? 4.02 : 4.45) * height / Math.max(1, height - bottomSpace - 12);
+    const widthInView = singlePage ? 3.06 : 7.2;
+    const worldHeight = Math.max(heightInView, widthInView / camera.aspect);
+    const distance = worldHeight / (2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)));
+    const offset = singlePage ? (this.leftPage ? -1 : 1) * paperWidth / 2 : -0.42;
+    const end = this.group.localToWorld(new THREE.Vector3(offset, paperSurface, 0));
+    end.y += distance;
+    end.z += worldHeight * (bottomSpace - 12) / (2 * height);
     const faceDown=new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI/2,0,0));
     this.moveCamera(end,faceDown,duration,()=>{this.phase="reading";});
+  }
+
+  resize() {
+    if (!this.active) return;
+    // The return pose must also match the new viewport after reading in landscape.
+    this.savedRotation.setFromEuler(this.camera.baseRotation);
+    const position = this.camera.zoomedDestination(this.camera.basePosition,
+      this.camera.baseRotation.x, this.camera.baseRotation.y, this.camera.baseRotation.z);
+    this.savedPosition.set(position.x, position.y, position.z);
+    if (this.phase === "leaving") this.returnToRoom(this.experience.motionDuration(0.25));
+    else this.approach(0);
   }
 
   moveCamera(end,orientation,duration,finish) {
@@ -319,6 +343,7 @@ export class ProjectDesk {
   open() {
     if(this.active || Modal.anyOpen || !this.canOpen()) return;
     this.phase="entering";
+    this.leftPage=false;
     this.savedPosition=this.camera.instance.position.clone();
     this.savedRotation=this.camera.instance.quaternion.clone();
     this.returnFocus=document.activeElement===this.openButton?this.openButton:this.canvas;
@@ -338,7 +363,11 @@ export class ProjectDesk {
     this.canvas.style.cursor="";
     this.nav.inert=true;
     this.nav.classList.add("leaving");
-    this.moveCamera(this.savedPosition,this.savedRotation,this.experience.motionDuration(1.25),()=>{
+    this.returnToRoom(this.experience.motionDuration(1.25));
+  }
+
+  returnToRoom(duration) {
+    this.moveCamera(this.savedPosition,this.savedRotation,duration,()=>{
       this.phase="room";
       this.nav.hidden=true;
       this.nav.inert=false;

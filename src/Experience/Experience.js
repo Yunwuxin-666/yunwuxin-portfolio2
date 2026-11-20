@@ -90,6 +90,8 @@ export class Experience {
   resize() {
     this.camera.resize();
     this.renderer.resize();
+    this.world?.raycaster?.syncFraming();
+    this.world?.projectDesk?.resize();
   }
 
   update() {

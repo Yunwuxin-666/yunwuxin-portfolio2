@@ -66,12 +66,13 @@ export class Camera {
   }
 
   setHomePose() {
-    this.compact = this.experience.device.isMobileDevice || this.experience.sizes.aspect < 1.2;
-    this.homeFov = this.compact ? 40 : 32;
-    this.homePosition.set(...(this.compact
-      ? [-1, 2.3276204297380789, 10.9035362538756501]
-      : [-0.35, 2.45, 9.1]));
-    this.homeRotation.set(this.compact ? 0 : 0.116, 0, 0);
+    const aspect = this.experience.sizes.aspect;
+    const portrait = 1 - THREE.MathUtils.smoothstep(aspect, 0.58, 1.35);
+    this.homeFov = 32 + 8 * portrait;
+    const halfAngle = THREE.MathUtils.degToRad(this.homeFov / 2);
+    const fitDesk = -26 + 17.5 / (2 * Math.tan(halfAngle) * aspect);
+    this.homePosition.set(-0.35 - 3.1 * portrait, 2.45, Math.max(9.1, Math.min(30, fitDesk)));
+    this.homeRotation.set(0.116 - 0.082 * portrait, 0, 0);
   }
 
   transitionFov(target) {
@@ -194,10 +195,10 @@ export class Camera {
   }
 
   resize() {
-    const wasCompact = this.compact;
+    const oldHome = this.homePosition.clone();
     this.setHomePose();
-    if (wasCompact !== this.compact && !this.locked && !this.experience.world?.raycaster?.inFocus) {
-      this.basePosition.copy(this.homePosition);
+    if (!this.experience.world?.raycaster?.inFocus) {
+      this.basePosition.add(this.homePosition.clone().sub(oldHome));
       this.baseRotation.copy(this.homeRotation);
       this.instance.fov = this.homeFov;
     }
@@ -227,6 +228,7 @@ export class Camera {
     this.zoomOffset = THREE.MathUtils.lerp(this.zoomOffset, this.zoomTarget, 0.1);
 
     if (this.experience.device.isMobileDevice) {
+      this.instance.rotation.copy(this.baseRotation);
       this.targetPosition.set(
         this.basePosition.x,
         this.basePosition.y,

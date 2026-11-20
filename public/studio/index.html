@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="zh-CN">
+  <meta charset="utf-8">
+  <title>Yunwuxin Portfolio</title>
+  <script>
+    const home = new URL("../", location.href);
+    home.search = location.search;
+    home.hash = location.hash;
+    location.replace(home);
+  </script>
+  <meta http-equiv="refresh" content="0; url=../">
+  <a href="../">进入工作室</a>
+</html>

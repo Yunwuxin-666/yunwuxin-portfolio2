@@ -212,137 +212,67 @@ export class Raycaster {
     }
   }
 
-  goToPhotos() {
-    this.inFocus = true;
-    this.cameraObj.locked = true;
-    this.cameraObj.transitionFov(40);
+  // Widths are measured across the subject in world units. Extra distance is
+  // applied along the viewing axis so a tall display keeps the same focal point.
+  focusPosition(view) {
+    const shots = {
+      photos: [PHOTOS_POS, 20.4, 11.65],
+      calendar: [CALENDAR_POS, 10, 5.35],
+      characters: [CHARACTERS_POS, 12, 7.2],
+      house: [HOUSE_POS, 12, 5.6],
+      draft: [MESSAGES_POS, 9.765, 4.15],
+    };
+    const [anchor, distance, width] = shots[view];
+    const required = width / (2 * Math.tan(Math.PI / 9) * this.camera.aspect);
+    const rotation = this.focusRotation(view);
+    const back = new THREE.Vector3(0, 0, 1).applyEuler(rotation);
+    const position = new THREE.Vector3(anchor.x, anchor.y, anchor.z);
+    if (view === "house") position.x = this._houseDragTargetX;
+    return position.addScaledVector(back, Math.max(0, required - distance));
+  }
 
-    const photoZ=Math.max(PHOTOS_POS.z,-30.63+11.65/(2*Math.tan(Math.PI/9)*this.camera.aspect));
-    const dest = this.cameraObj.zoomedDestination({...PHOTOS_POS,z:photoZ});
-    gsap.to(this.cameraObj.instance.position, {
-      x: dest.x,
-      y: dest.y,
-      z: dest.z,
-      duration: this.experience.motionDuration(2),
-      ease: "power2.inOut",
-    });
-    gsap.to(this.cameraObj.instance.rotation, {
-      x: 0,
-      y: 0,
-      z: 0,
-      duration: this.experience.motionDuration(2),
-      ease: "power2.inOut",
+  focusRotation(view) {
+    const rotation = {characters: CHARACTERS_ROT, house: HOUSE_ROT, draft: MESSAGES_ROT}[view];
+    return rotation ? new THREE.Euler(rotation.x, rotation.y, rotation.z) : new THREE.Euler();
+  }
+
+  syncFraming() {
+    if (!this.focusView) return;
+    this.cameraObj.basePosition.copy(this.focusPosition(this.focusView));
+    this.cameraObj.baseRotation.copy(this.focusRotation(this.focusView));
+  }
+
+  focusOn(view, onArrival) {
+    this.inFocus = true;
+    this.focusView = view;
+    const rig = this.cameraObj;
+    rig.locked = true;
+    rig.transitionFov(40);
+    const rot = this.focusRotation(view);
+    const dest = rig.zoomedDestination(this.focusPosition(view), rot.x, rot.y, rot.z);
+    const duration = this.experience.motionDuration(2);
+    gsap.to(this.camera.position, { ...dest, duration, ease: "power2.inOut" });
+    gsap.to(this.camera.rotation, {
+      x: rot.x, y: rot.y, z: rot.z, duration, ease: "power2.inOut",
       onComplete: () => {
-        this.cameraObj.basePosition.set(
-          PHOTOS_POS.x,
-          PHOTOS_POS.y,
-          photoZ,
-        );
-        this.cameraObj.baseRotation.set(0,0,0);
-        this.cameraObj.mousePositionStrength = 0;
-        this.cameraObj.mouseRotationStrength = 0;
-        this.cameraObj.locked = false;
-        this.backBtn.classList.add("back-btn--visible");
-        gsap.to(this.cameraObj, {
-          mousePositionStrength: 0.5,
-          mouseRotationStrength: 0.01,
-          duration: this.experience.motionDuration(0.6),
-          ease: "power2.out",
-        });
+        this.syncFraming();
+        rig.mousePositionStrength = 0;
+        rig.mouseRotationStrength = 0;
+        rig.locked = false;
+        this.backBtn.classList.toggle("back-btn--visible", view !== "draft");
+        this._messagesBackBtn.classList.toggle("back-btn--visible", view === "draft");
+        if (view !== "house" && view !== "draft") {
+          gsap.to(rig, {mousePositionStrength: 0.5, mouseRotationStrength: 0.01,
+            duration: this.experience.motionDuration(0.6), ease: "power2.out"});
+        }
+        onArrival?.();
       },
     });
   }
 
-  goToCalendar() {
-    this.inFocus = true;
-    this.cameraObj.locked = true;
-    this.cameraObj.transitionFov(40);
-
-    const calendarZ = Math.max(CALENDAR_POS.z,-30.6463+5.35/(2*Math.tan(Math.PI/9)*this.camera.aspect));
-    const dest = this.cameraObj.zoomedDestination({...CALENDAR_POS,z:calendarZ});
-    gsap.to(this.cameraObj.instance.position, {
-      x: dest.x,
-      y: dest.y,
-      z: dest.z,
-      duration: this.experience.motionDuration(2),
-      ease: "power2.inOut",
-    });
-    gsap.to(this.cameraObj.instance.rotation, {
-      x: 0,
-      y: 0,
-      z: 0,
-      duration: this.experience.motionDuration(2),
-      ease: "power2.inOut",
-      onComplete: () => {
-        this.cameraObj.basePosition.set(
-          CALENDAR_POS.x,
-          CALENDAR_POS.y,
-          calendarZ,
-        );
-        this.cameraObj.baseRotation.set(0,0,0);
-        this.cameraObj.mousePositionStrength = 0;
-        this.cameraObj.mouseRotationStrength = 0;
-        this.cameraObj.locked = false;
-        this.backBtn.classList.add("back-btn--visible");
-        gsap.to(this.cameraObj, {
-          mousePositionStrength: 0.5,
-          mouseRotationStrength: 0.01,
-          duration: this.experience.motionDuration(0.6),
-          ease: "power2.out",
-        });
-      },
-    });
-  }
-
-  goToCharacters() {
-    this.inFocus = true;
-    this.cameraObj.locked = true;
-    this.cameraObj.transitionFov(40);
-
-    const dest = this.cameraObj.zoomedDestination(
-      CHARACTERS_POS,
-      CHARACTERS_ROT.x,
-      CHARACTERS_ROT.y,
-      CHARACTERS_ROT.z,
-    );
-    gsap.to(this.cameraObj.instance.position, {
-      x: dest.x,
-      y: dest.y,
-      z: dest.z,
-      duration: this.experience.motionDuration(2),
-      ease: "power2.inOut",
-    });
-    gsap.to(this.cameraObj.instance.rotation, {
-      x: CHARACTERS_ROT.x,
-      y: CHARACTERS_ROT.y,
-      z: CHARACTERS_ROT.z,
-      duration: this.experience.motionDuration(2),
-      ease: "power2.inOut",
-      onComplete: () => {
-        this.cameraObj.basePosition.set(
-          CHARACTERS_POS.x,
-          CHARACTERS_POS.y,
-          CHARACTERS_POS.z,
-        );
-        this.cameraObj.baseRotation.set(
-          CHARACTERS_ROT.x,
-          CHARACTERS_ROT.y,
-          CHARACTERS_ROT.z,
-        );
-        this.cameraObj.mousePositionStrength = 0;
-        this.cameraObj.mouseRotationStrength = 0;
-        this.cameraObj.locked = false;
-        this.backBtn.classList.add("back-btn--visible");
-        gsap.to(this.cameraObj, {
-          mousePositionStrength: 0.5,
-          mouseRotationStrength: 0.01,
-          duration: this.experience.motionDuration(0.6),
-          ease: "power2.out",
-        });
-        this.enableCharacterInteraction();
-      },
-    });
-  }
+  goToPhotos() { this.focusOn("photos"); }
+  goToCalendar() { this.focusOn("calendar"); }
+  goToCharacters() { this.focusOn("characters", () => this.enableCharacterInteraction()); }
 
   enableCharacterInteraction() {
     this._inCharactersMode = true;
@@ -386,41 +316,7 @@ export class Raycaster {
     this.modal.close();
   }
 
-  goToHouse() {
-    this.inFocus = true;
-    this.cameraObj.locked = true;
-    this.cameraObj.transitionFov(40);
-
-    const dest = this.cameraObj.zoomedDestination(
-      HOUSE_POS,
-      HOUSE_ROT.x,
-      HOUSE_ROT.y,
-      HOUSE_ROT.z,
-    );
-    gsap.to(this.cameraObj.instance.position, {
-      x: dest.x,
-      y: dest.y,
-      z: dest.z,
-      duration: this.experience.motionDuration(2),
-      ease: "power2.inOut",
-    });
-    gsap.to(this.cameraObj.instance.rotation, {
-      x: HOUSE_ROT.x,
-      y: HOUSE_ROT.y,
-      z: HOUSE_ROT.z,
-      duration: this.experience.motionDuration(2),
-      ease: "power2.inOut",
-      onComplete: () => {
-        this.cameraObj.basePosition.set(HOUSE_POS.x, HOUSE_POS.y, HOUSE_POS.z);
-        this.cameraObj.baseRotation.set(HOUSE_ROT.x, HOUSE_ROT.y, HOUSE_ROT.z);
-        this.cameraObj.mousePositionStrength = 0;
-        this.cameraObj.mouseRotationStrength = 0;
-        this.cameraObj.locked = false;
-        this.backBtn.classList.add("back-btn--visible");
-        this.enableHouseDrag();
-      },
-    });
-  }
+  goToHouse() { this.focusOn("house", () => this.enableHouseDrag()); }
 
   _createDragHint() {
     const style = document.createElement("style");
@@ -750,90 +646,21 @@ export class Raycaster {
     this._inHouseMode = false;
     this._inMessagesMode = true;
     this._dragHint.classList.remove("visible");
-    this.cameraObj.locked = true;
-
-    // Keep both paper corners visible in the overhead view on narrow screens.
-    const deskY = -1.42;
-    const widthWithMargin = 4.15;
-    const cameraHeight = widthWithMargin / (2 * Math.tan(THREE.MathUtils.degToRad(20)) * this.camera.aspect);
-    const paperView = { ...MESSAGES_POS, y: Math.max(MESSAGES_POS.y, deskY + cameraHeight) };
-    const dest = this.cameraObj.zoomedDestination(
-      paperView,
-      MESSAGES_ROT.x,
-      MESSAGES_ROT.y,
-      MESSAGES_ROT.z,
-    );
-    gsap.to(this.cameraObj.instance.position, {
-      x: dest.x,
-      y: dest.y,
-      z: dest.z,
-      duration: this.experience.motionDuration(2),
-      ease: "power2.inOut",
-    });
-    gsap.to(this.cameraObj.instance.rotation, {
-      x: MESSAGES_ROT.x,
-      y: MESSAGES_ROT.y,
-      z: MESSAGES_ROT.z,
-      duration: this.experience.motionDuration(2),
-      ease: "power2.inOut",
-      onComplete: () => {
-        this.cameraObj.basePosition.set(paperView.x, paperView.y, paperView.z);
-        this.cameraObj.baseRotation.set(
-          MESSAGES_ROT.x,
-          MESSAGES_ROT.y,
-          MESSAGES_ROT.z,
-        );
-        this.cameraObj.mousePositionStrength = 0;
-        this.cameraObj.mouseRotationStrength = 0;
-        this.cameraObj.locked = false;
-        this.backBtn.classList.remove("back-btn--visible");
-        this._messagesBackBtn.classList.add("back-btn--visible");
-      },
-    });
+    this.focusOn("draft");
   }
 
   goBackToHouse() {
     this._inMessagesMode = false;
-    this.cameraObj.locked = true;
     this._messagesBackBtn.classList.remove("back-btn--visible");
-
-    const restoreX = this._savedHouseDragX ?? HOUSE_POS.x;
-    this._houseDragTargetX = restoreX;
-    const restorePos = { x: restoreX, y: HOUSE_POS.y, z: HOUSE_POS.z };
-    const dest = this.cameraObj.zoomedDestination(
-      restorePos,
-      HOUSE_ROT.x,
-      HOUSE_ROT.y,
-      HOUSE_ROT.z,
-    );
-
-    gsap.to(this.cameraObj.instance.position, {
-      x: dest.x,
-      y: dest.y,
-      z: dest.z,
-      duration: this.experience.motionDuration(2),
-      ease: "power2.inOut",
-    });
-    gsap.to(this.cameraObj.instance.rotation, {
-      x: HOUSE_ROT.x,
-      y: HOUSE_ROT.y,
-      z: HOUSE_ROT.z,
-      duration: this.experience.motionDuration(2),
-      ease: "power2.inOut",
-      onComplete: () => {
-        this.cameraObj.basePosition.set(restoreX, HOUSE_POS.y, HOUSE_POS.z);
-        this.cameraObj.baseRotation.set(HOUSE_ROT.x, HOUSE_ROT.y, HOUSE_ROT.z);
-        this.cameraObj.mousePositionStrength = 0;
-        this.cameraObj.mouseRotationStrength = 0;
-        this.cameraObj.locked = false;
-        this._inHouseMode = true;
-        if (!dragHintDismissed) this._dragHint.classList.add("visible");
-        this.backBtn.classList.add("back-btn--visible");
-      },
+    this._houseDragTargetX = this._savedHouseDragX ?? HOUSE_POS.x;
+    this.focusOn("house", () => {
+      this._inHouseMode = true;
+      if (!dragHintDismissed) this._dragHint.classList.add("visible");
     });
   }
 
   goHome() {
+    this.focusView = null;
     if (this._inMessagesMode) {
       this._inMessagesMode = false;
       this._messagesBackBtn.classList.remove("back-btn--visible");
@@ -862,6 +689,8 @@ export class Raycaster {
       duration: this.experience.motionDuration(2),
       ease: "power2.inOut",
       onComplete: () => {
+        this.camera.fov = this.cameraObj.homeFov;
+        this.camera.updateProjectionMatrix();
         this.cameraObj.basePosition.copy(home);
         this.cameraObj.baseRotation.copy(rotation);
         this.cameraObj.mousePositionStrength = 0;
