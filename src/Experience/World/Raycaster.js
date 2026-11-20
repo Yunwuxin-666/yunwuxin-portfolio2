@@ -32,7 +32,7 @@ const CHARACTER_DATA = {
   },
 };
 const ROOM_LABELS = {
-  Photos_Raycaster_Hitbox: "相框",
+  Photos_Raycaster_Hitbox: "包豪斯海报",
   Calendar_Raycaster_Hitbox: "工作室月历",
   Characters_Raycaster_Hitbox: "项目日程",
   House_Raycaster_Hitbox: "模型工作台",

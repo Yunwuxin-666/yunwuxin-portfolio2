@@ -8,7 +8,7 @@ export function roomAtlases(useKtx, night = false) {
     const frames = name === "frames";
     const ordinal = frames ? "second" : name.split("-")[0];
     const compressed = useKtx && !frames;
-    const filename = frames ? "frames-" + mode : name + "_" + mode;
+    const filename = frames ? "bauhaus-frames-" + mode : name + "_" + mode;
     const path = root + "textures/" + mode + "/" + filename;
     return {
       name: ordinal + (night ? "NightTexture" : "Texture"),
